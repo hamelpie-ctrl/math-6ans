@@ -30,7 +30,7 @@
     <div class="dotsRow" id="dots"></div>
 
     <div class="hint">
-      Astuce : touche la case, puis 🎤 du clavier. Dis “deux” → 2.
+      Touche la case et utilise le 🎤 du clavier. Dis “douze” → 12.
     </div>
 
     <input id="answer" type="text" placeholder="Ta réponse">
@@ -75,76 +75,46 @@ const FR_NUM = new Map([
 ]);
 
 function normalize(s){
-  return (s || "")
-    .toLowerCase()
-    .trim()
-    .replace(/[’']/g," ")
-    .replace(/\s+/g," ");
+  return (s||"").toLowerCase().trim().replace(/[’']/g," ").replace(/\s+/g," ");
 }
 
-let lastValue = "";
 function applyDictationFix(){
-  const current = answerEl.value;
-  if (current === lastValue) return; // rien de nouveau
-  lastValue = current;
+  const raw = normalize(answerEl.value);
 
-  const raw = normalize(current);
-
-  if (FR_NUM.has(raw)) {
-    answerEl.value = String(FR_NUM.get(raw));
-    lastValue = answerEl.value;
+  if(FR_NUM.has(raw)){
+    answerEl.value = FR_NUM.get(raw);
     return;
   }
 
-  // Ex: "2." "2 ," "1 2" -> "12"
-  const digits = raw.replace(/\D+/g, "");
-  if (digits.length > 0 && digits !== current) {
+  const digits = raw.replace(/\D+/g,'');
+  if(digits.length>0){
     answerEl.value = digits;
-    lastValue = answerEl.value;
   }
 }
 
-// --- Mode "réaction rapide" : 2 secondes après focus/tap ---
-let fastTimer = null;
-let fastEndAt = 0;
-
-function startFastWatch(){
-  stopFastWatch();
-  fastEndAt = Date.now() + 2000; // 2s
-  fastTimer = setInterval(() => {
+// Watcher rapide pendant 2s après focus (fix iPad)
+let timer=null, endAt=0;
+function startWatcher(){
+  endAt = Date.now()+2000;
+  timer = setInterval(()=>{
     applyDictationFix();
-    if (Date.now() >= fastEndAt) stopFastWatch();
-  }, 40); // rapide => conversion quasi immédiate quand iOS dépose le texte
+    if(Date.now()>endAt) clearInterval(timer);
+  },40);
 }
-
-function stopFastWatch(){
-  if (fastTimer) clearInterval(fastTimer);
-  fastTimer = null;
-}
-
-answerEl.addEventListener("focus", () => {
-  lastValue = "";
-  startFastWatch();
+answerEl.addEventListener("focus",startWatcher);
+["input","change","keyup","blur"].forEach(e=>{
+  answerEl.addEventListener(e,()=>setTimeout(applyDictationFix,0));
 });
 
-// Quand l’utilisateur touche le champ (souvent juste avant dictée)
-answerEl.addEventListener("touchstart", () => startFastWatch(), {passive:true});
-
-// Événements classiques (si iOS les envoie)
-["input","change","keyup","blur"].forEach(evt=>{
-  answerEl.addEventListener(evt, () => setTimeout(applyDictationFix, 0));
-});
-
-function speak(text){
+function speak(t){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'fr-CA';
-  u.rate = 0.9;
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang='fr-CA';
   speechSynthesis.speak(u);
 }
 
-function rand(n){ return Math.floor(Math.random()*n); }
+function rand(n){return Math.floor(Math.random()*n);}
 
 function drawDots(n){
   dotsEl.innerHTML='';
@@ -155,63 +125,62 @@ function drawDots(n){
   }
 }
 
-function updateStars(){
-  starsEl.textContent='⭐'.repeat(stars);
-}
+function updateStars(){starsEl.textContent='⭐'.repeat(stars);}
 
 function newQ(){
   rewardEl.textContent='';
   msgEl.textContent='';
   answerEl.value='';
-  lastValue = "";
 
-  const max = level * 10;
-  op = Math.random()<0.5 ? '+' : '−';
-  a = rand(max);
-  b = rand(max);
-  if(op==='−' && b>a) [a,b]=[b,a];
+  const max=level*10;
+  op=Math.random()<0.5?'+':'−';
+  a=rand(max); b=rand(max);
+  if(op==='−'&&b>a)[a,b]=[b,a];
 
-  expected = op==='+' ? a+b : a-b;
+  expected=op==='+'?a+b:a-b;
 
-  qEl.textContent = `${a} ${op} ${b} = ?`;
-  drawDots(op==='+' ? (a+b) : a);
-
+  qEl.textContent=`${a} ${op} ${b} = ?`;
+  drawDots(op==='+'?(a+b):a);
   speak(`${a} ${op==='+'?'plus':'moins'} ${b}`);
   answerEl.focus();
-  startFastWatch();
 }
 
 function nextLevel(){
   level++;
-  stars = 5;
+  stars=5;
   updateStars();
   msgEl.textContent="🏆 Nouveau niveau !";
   speak("Nouveau niveau !");
-  setTimeout(newQ, 900);
+  setTimeout(newQ,1500);
 }
 
 function check(){
-  applyDictationFix(); // garanti
-  const val = parseInt(answerEl.value, 10);
-  if(Number.isNaN(val)) return;
+  applyDictationFix();
+  const val=parseInt(answerEl.value);
+  if(isNaN(val))return;
 
-  if(val === expected){
+  if(val===expected){
     msgEl.textContent="Bravo 🎉";
-    rewardEl.textContent = rewards[rand(rewards.length)];
+    rewardEl.textContent=rewards[rand(rewards.length)];
     speak("Bravo !");
     stars--;
     updateStars();
-    if(stars === 0) nextLevel();
-    else setTimeout(newQ, 900);
-  } else {
+
+    setTimeout(()=>{
+      if(stars===0)nextLevel();
+      else newQ();
+    },3000);
+
+  }else{
     msgEl.textContent="Essaie encore 🙂";
     speak("Essaie encore");
-    answerEl.select();
+
+    setTimeout(()=>answerEl.select(),2000);
   }
 }
 
-checkBtn.addEventListener('click', check);
-answerEl.addEventListener('keydown', e => { if(e.key==='Enter') check(); });
+checkBtn.addEventListener('click',check);
+answerEl.addEventListener('keydown',e=>{if(e.key==='Enter')check();});
 
 updateStars();
 newQ();
