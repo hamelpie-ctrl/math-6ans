@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Jeu de maths — Réponse parlée</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  body { font-family: system-ui; margin:0; background:#f4f6fb; }
+  .wrap { max-width:760px; margin:auto; padding:16px; }
+  .card { background:#fff; border-radius:20px; padding:16px; box-shadow:0 8px 20px rgba(0,0,0,.1); text-align:center;}
+  .question { font-size:48px; font-weight:900; margin:10px 0; }
+  .dotsRow { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin:10px 0; }
+  .dot { width:18px; height:18px; border-radius:50%; border:2px solid #333; }
+  .msg { font-size:22px; min-height:30px; margin-top:8px; }
+  .reward { font-size:80px; margin-top:10px; height:90px; }
+  button { font-size:18px; padding:10px 14px; border-radius:12px; border:0; background:#2f6fed; color:white; margin-top:8px;}
+  .stars { font-size:26px; margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>🧸 Jeu de maths parlant</h1>
+    <div class="stars" id="stars">⭐⭐⭐⭐⭐</div>
+    <div class="question" id="q">—</div>
+    <div class="dotsRow" id="dots"></div>
+
+    <button onclick="startListening()">🎤 Réponds en parlant</button>
+
+    <div class="msg" id="msg"></div>
+    <div class="reward" id="reward"></div>
+  </div>
+</div>
+
+<script>
+let level = 1;
+let stars = 5;
+let a,b,op,expected;
+
+const rewards = ["🐶","🐱","🦊","🐼","🐸","🐵","🦁","🐯","🚗","🚀","🦕","🦖","🦄","🐙","🐠"];
+
+const qEl = document.getElementById('q');
+const msgEl = document.getElementById('msg');
+const starsEl = document.getElementById('stars');
+const dotsEl = document.getElementById('dots');
+const rewardEl = document.getElementById('reward');
+
+function speak(text){
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'fr-CA';
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+
+function rand(n){ return Math.floor(Math.random()*n); }
+
+function maxN(){
+  if(level===1) return 10;
+  if(level===2) return 20;
+  if(level===3) return 30;
+  return 50;
+}
+
+function drawDots(n){
+  dotsEl.innerHTML='';
+  for(let i=0;i<n;i++){
+    const d=document.createElement('div');
+    d.className='dot';
+    dotsEl.appendChild(d);
+  }
+}
+
+function newQ(){
+  rewardEl.textContent='';
+  const m=maxN();
+  op=Math.random()<0.5?'+':'−';
+  a=rand(m);
+  b=rand(m);
+  if(op==='−' && b>a){ let t=a;a=b;b=t; }
+  expected=op==='+'?a+b:a-b;
+
+  qEl.textContent=`${a} ${op} ${b} = ?`;
+  drawDots(op==='+'?a+b:a);
+  msgEl.textContent='';
+  speak(`${a} ${op==='+'?'plus':'moins'} ${b}`);
+}
+
+function updateStars(){
+  starsEl.textContent='⭐'.repeat(stars);
+}
+
+function showReward(){
+  rewardEl.textContent = rewards[rand(rewards.length)];
+}
+
+function nextLevel(){
+  level++;
+  stars=5;
+  updateStars();
+  speak("Nouveau niveau!");
+  setTimeout(newQ,1200);
+}
+
+function checkAnswer(val){
+  if(val===expected){
+    msgEl.textContent="Bravo 🎉";
+    speak("Bravo!");
+    showReward();
+    stars--;
+    updateStars();
+    if(stars===0){
+      nextLevel();
+    } else {
+      setTimeout(newQ,1200);
+    }
+  } else {
+    msgEl.textContent="Essaie encore 🙂";
+    speak("Essaie encore");
+  }
+}
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recog = new SpeechRecognition();
+recog.lang = 'fr-CA';
+recog.interimResults = false;
+
+function startListening(){
+  msgEl.textContent="J'écoute...";
+  recog.start();
+}
+
+recog.onresult = function(event){
+  const text = event.results[0][0].transcript;
+  const num = parseInt(text);
+  msgEl.textContent = "Tu as dit : " + text;
+  checkAnswer(num);
+};
+
+updateStars();
+newQ();
+</script>
+</body>
+</html>
