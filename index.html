@@ -1,24 +1,41 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Math 6 ans</title>
-  <style>
-    body { font-family: system-ui; margin:0; background:#f4f6fb; }
-    .wrap { max-width:760px; margin:auto; padding:16px; }
-    .card { background:#fff; border-radius:20px; padding:16px; box-shadow:0 8px 20px rgba(0,0,0,.1); text-align:center;}
-    .question { font-size:48px; font-weight:900; margin:10px 0; }
-    .dotsRow { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin:10px 0; }
-    .dot { width:18px; height:18px; border-radius:50%; border:2px solid #333; }
-    .msg { font-size:22px; min-height:30px; margin-top:8px; }
-    .reward { font-size:80px; margin-top:10px; height:90px; }
-    .stars { font-size:26px; margin-top:6px; }
-    input { font-size:24px; padding:10px; width:220px; text-align:center; border-radius:12px; border:1px solid #ccc; }
-    button { font-size:20px; padding:10px 14px; border-radius:12px; border:0; background:#2f6fed; color:white; margin-top:8px; }
-    .hint { font-size:14px; color:#556; margin-top:8px; }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Math 6 ans</title>
+
+<style>
+body { font-family: system-ui; margin:0; background:#f4f6fb; }
+.wrap { max-width:760px; margin:auto; padding:16px; }
+.card { background:#fff; border-radius:20px; padding:16px; box-shadow:0 8px 20px rgba(0,0,0,.1); text-align:center;}
+.question { font-size:48px; font-weight:900; margin:10px 0; }
+.dotsRow { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin:10px 0; }
+.dot { width:18px; height:18px; border-radius:50%; border:2px solid #333; }
+.msg { font-size:22px; min-height:30px; margin-top:8px; }
+.reward { font-size:80px; margin-top:10px; height:90px; }
+.stars { font-size:26px; margin-top:6px; }
+input {
+  font-size:24px;
+  padding:10px;
+  width:220px;
+  text-align:center;
+  border-radius:12px;
+  border:1px solid #ccc;
+}
+button {
+  font-size:20px;
+  padding:10px 14px;
+  border-radius:12px;
+  border:0;
+  background:#2f6fed;
+  color:white;
+  margin-top:8px;
+}
+.hint { font-size:14px; color:#556; margin-top:8px; }
+</style>
 </head>
+
 <body>
 <div class="wrap">
   <div class="card">
@@ -27,11 +44,15 @@
     <div class="question" id="q">—</div>
     <div class="dotsRow" id="dots"></div>
 
-    <div class="hint">Astuce iPad : tu peux utiliser le 🎤 du clavier pour dicter la réponse.</div>
+    <div class="hint">
+      Astuce : touche la case et utilise le 🎤 du clavier pour parler.
+    </div>
 
-    <input id="answer" type="text" placeholder="Ta réponse" autocomplete="off" autocorrect="off" spellcheck="false">
+    <!-- IMPORTANT : type="text" pour garder le micro -->
+    <input id="answer" type="text" placeholder="Ta réponse">
+
     <br>
-    <button id="checkBtn" type="button">Vérifier</button>
+    <button id="checkBtn">Vérifier</button>
 
     <div class="msg" id="msg"></div>
     <div class="reward" id="reward"></div>
@@ -39,107 +60,96 @@
 </div>
 
 <script>
-  let level = 1, stars = 5, a = 0, b = 0, op = '+', expected = 0;
-  const rewards = ["🐶","🐱","🦊","🐼","🐸","🐵","🦁","🐯","🚗","🚀","🦕","🦖","🦄","🐙","🐠"];
+let level = 1, stars = 5, a, b, op, expected;
+const rewards = ["🐶","🐱","🦊","🐼","🐸","🐵","🦁","🐯","🚗","🚀","🦕","🦖","🦄"];
 
-  const qEl = document.getElementById('q');
-  const msgEl = document.getElementById('msg');
-  const dotsEl = document.getElementById('dots');
-  const starsEl = document.getElementById('stars');
-  const rewardEl = document.getElementById('reward');
-  const answerEl = document.getElementById('answer');
-  const checkBtn = document.getElementById('checkBtn');
+const qEl = document.getElementById('q');
+const msgEl = document.getElementById('msg');
+const dotsEl = document.getElementById('dots');
+const starsEl = document.getElementById('stars');
+const rewardEl = document.getElementById('reward');
+const answerEl = document.getElementById('answer');
+const checkBtn = document.getElementById('checkBtn');
 
-  function speak(text){
-    if(!('speechSynthesis' in window)) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'fr-CA';
-    u.rate = 0.9;
-    speechSynthesis.speak(u);
+// Empêche les lettres (garde seulement chiffres)
+answerEl.addEventListener('input', () => {
+  answerEl.value = answerEl.value.replace(/\D+/g, '');
+});
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'fr-CA';
+  speechSynthesis.speak(u);
+}
+
+function rand(n){ return Math.floor(Math.random()*n); }
+
+function drawDots(n){
+  dotsEl.innerHTML='';
+  for(let i=0;i<n;i++){
+    const d=document.createElement('div');
+    d.className='dot';
+    dotsEl.appendChild(d);
   }
+}
 
-  function randInt(min, max){
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+function updateStars(){
+  starsEl.textContent='⭐'.repeat(stars);
+}
 
-  function maxN(){
-    if(level === 1) return 10;
-    if(level === 2) return 20;
-    if(level === 3) return 30;
-    return 50;
-  }
+function newQ(){
+  rewardEl.textContent='';
+  msgEl.textContent='';
+  answerEl.value='';
 
-  function drawDots(n){
-    dotsEl.innerHTML = '';
-    for(let i=0;i<n;i++){
-      const d = document.createElement('div');
-      d.className = 'dot';
-      dotsEl.appendChild(d);
-    }
-  }
+  const max = level * 10;
+  op = Math.random()<0.5?'+':'−';
+  a = rand(max);
+  b = rand(max);
 
-  function updateStars(){
-    starsEl.textContent = '⭐'.repeat(stars);
-  }
+  if(op==='−' && b>a){ [a,b] = [b,a]; }
 
-  function newQuestion(){
-    rewardEl.textContent = '';
-    msgEl.textContent = '';
-    answerEl.value = '';
+  expected = op==='+' ? a+b : a-b;
 
-    const m = maxN();
-    op = Math.random() < 0.5 ? '+' : '−';
+  qEl.textContent = `${a} ${op} ${b} = ?`;
+  drawDots(op==='+' ? (a+b) : a);
 
-    a = randInt(0, m);
-    b = randInt(0, m);
+  speak(`${a} ${op==='+'?'plus':'moins'} ${b}`);
+}
 
-    if(op === '−' && b > a) [a, b] = [b, a];
-
-    expected = (op === '+') ? (a + b) : (a - b);
-
-    qEl.textContent = `${a} ${op} ${b} = ?`;
-    drawDots(op === '+' ? (a + b) : a);
-
-    speak(`${a} ${op === '+' ? 'plus' : 'moins'} ${b}`);
-    answerEl.focus();
-  }
-
-  function nextLevel(){
-    level++;
-    stars = 5;
-    updateStars();
-    msgEl.textContent = "🏆 Nouveau niveau !";
-    speak("Nouveau niveau!");
-    setTimeout(newQuestion, 900);
-  }
-
-  function check(){
-    const val = parseInt(answerEl.value, 10);
-    if(Number.isNaN(val)) return;
-
-    if(val === expected){
-      msgEl.textContent = "Bravo 🎉";
-      speak("Bravo!");
-      rewardEl.textContent = rewards[randInt(0, rewards.length - 1)];
-
-      stars--;
-      updateStars();
-
-      if(stars === 0) nextLevel();
-      else setTimeout(newQuestion, 900);
-    } else {
-      msgEl.textContent = "Essaie encore 🙂";
-      speak("Essaie encore");
-      answerEl.select();
-    }
-  }
-
-  checkBtn.addEventListener('click', check);
-  answerEl.addEventListener('keydown', (e) => { if(e.key === 'Enter') check(); });
-
+function nextLevel(){
+  level++;
+  stars = 5;
   updateStars();
-  newQuestion();
+  msgEl.textContent="🏆 Nouveau niveau !";
+  speak("Nouveau niveau !");
+  setTimeout(newQ,900);
+}
+
+function check(){
+  const val = parseInt(answerEl.value);
+  if(val === expected){
+    msgEl.textContent="Bravo 🎉";
+    rewardEl.textContent = rewards[rand(rewards.length)];
+    speak("Bravo !");
+    stars--;
+    updateStars();
+
+    if(stars===0) nextLevel();
+    else setTimeout(newQ,900);
+  } else {
+    msgEl.textContent="Essaie encore 🙂";
+    speak("Essaie encore");
+  }
+}
+
+checkBtn.addEventListener('click', check);
+answerEl.addEventListener('keydown', e => { if(e.key==='Enter') check(); });
+
+updateStars();
+newQ();
 </script>
 </body>
 </html>
