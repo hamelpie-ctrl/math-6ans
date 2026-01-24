@@ -15,7 +15,7 @@
   .msg { font-size:22px; min-height:30px; margin-top:8px; }
   .reward { font-size:80px; margin-top:10px; height:90px; }
   .stars { font-size:26px; margin-top:6px; }
-  input { font-size:24px; padding:10px; width:240px; text-align:center; border-radius:12px; border:1px solid #ccc; }
+  input { font-size:24px; padding:10px; width:260px; text-align:center; border-radius:12px; border:1px solid #ccc; }
   button { font-size:20px; padding:10px 14px; border-radius:12px; border:0; background:#2f6fed; color:white; margin-top:8px; }
   .hint { font-size:14px; color:#556; margin-top:8px; }
 </style>
@@ -30,12 +30,12 @@
     <div class="dotsRow" id="dots"></div>
 
     <div class="hint">
-      Astuce : touche la case et utilise le 🎤 du clavier. Dis “douze”, le jeu écrit 12.
+      Astuce : touche la case et utilise le 🎤 du clavier. Dis “deux”, le jeu écrira 2.
     </div>
 
     <input id="answer" type="text" placeholder="Ta réponse">
     <br>
-    <button id="checkBtn">Vérifier</button>
+    <button id="checkBtn" type="button">Vérifier</button>
 
     <div class="msg" id="msg"></div>
     <div class="reward" id="reward"></div>
@@ -75,35 +75,64 @@ const FR_NUM = new Map([
 ]);
 
 function normalize(s){
-  return s.toLowerCase().trim().replace(/[’']/g," ").replace(/\s+/g," ");
+  return (s || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[’']/g," ")
+    .replace(/\s+/g," ");
 }
 
-// --- FIX DICTÉE iPad ---
+let lastSeen = "";
 function applyDictationFix(){
-  const raw = normalize(answerEl.value);
+  const raw0 = answerEl.value;
+  const raw = normalize(raw0);
 
-  if(FR_NUM.has(raw)){
-    answerEl.value = FR_NUM.get(raw);
+  // Si rien n'a changé depuis la dernière fois, inutile de refaire
+  if (raw0 === lastSeen) return;
+  lastSeen = raw0;
+
+  // 1) Mots -> chiffres
+  if (FR_NUM.has(raw)) {
+    answerEl.value = String(FR_NUM.get(raw));
+    lastSeen = answerEl.value;
     return;
   }
 
-  const digits = raw.replace(/\D+/g, '');
-  if(digits.length>0){
+  // 2) Garder seulement les chiffres (ex: "2." ou "2 ," ou "1 2")
+  const digits = raw.replace(/\D+/g, "");
+  if (digits.length > 0 && digits !== raw0) {
     answerEl.value = digits;
+    lastSeen = answerEl.value;
   }
 }
 
-["input","change","blur"].forEach(evt=>{
-  answerEl.addEventListener(evt, ()=>{
-    setTimeout(applyDictationFix,0);
-  });
+// Événements classiques (quand iOS les envoie)
+["input","change","keyup"].forEach(evt=>{
+  answerEl.addEventListener(evt, ()=> setTimeout(applyDictationFix, 0));
 });
+
+// ✅ Correctif iPad : surveille pendant que le champ est actif (dictée parfois silencieuse)
+let watcher = null;
+function startWatcher(){
+  stopWatcher();
+  watcher = setInterval(applyDictationFix, 120); // léger, seulement pendant le focus
+}
+function stopWatcher(){
+  if (watcher) clearInterval(watcher);
+  watcher = null;
+}
+answerEl.addEventListener("focus", startWatcher);
+answerEl.addEventListener("blur", stopWatcher);
+
+// Bonus: si l’utilisateur touche l’écran, ça peut finaliser la dictée
+document.addEventListener("selectionchange", () => setTimeout(applyDictationFix, 0));
 
 function speak(text){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'fr-CA';
+  u.rate = 0.9;
   speechSynthesis.speak(u);
 }
 
@@ -126,50 +155,56 @@ function newQ(){
   rewardEl.textContent='';
   msgEl.textContent='';
   answerEl.value='';
+  lastSeen = "";
 
-  const max = level*10;
-  op = Math.random()<0.5?'+':'−';
+  const max = level * 10;
+  op = Math.random()<0.5 ? '+' : '−';
   a = rand(max);
   b = rand(max);
+  if(op==='−' && b>a) [a,b]=[b,a];
 
-  if(op==='−' && b>a){ [a,b]=[b,a]; }
-
-  expected = op==='+'?a+b:a-b;
+  expected = op==='+' ? a+b : a-b;
 
   qEl.textContent = `${a} ${op} ${b} = ?`;
-  drawDots(op==='+'?(a+b):a);
+  drawDots(op==='+' ? (a+b) : a);
+
   speak(`${a} ${op==='+'?'plus':'moins'} ${b}`);
+  answerEl.focus();
 }
 
 function nextLevel(){
   level++;
-  stars=5;
+  stars = 5;
   updateStars();
   msgEl.textContent="🏆 Nouveau niveau !";
   speak("Nouveau niveau !");
-  setTimeout(newQ,900);
+  setTimeout(newQ, 900);
 }
 
 function check(){
-  applyDictationFix(); // <-- super important
-  const val = parseInt(answerEl.value);
+  // 🔒 Garantie: on convertit juste avant la vérification
+  applyDictationFix();
 
-  if(val===expected){
+  const val = parseInt(answerEl.value, 10);
+  if(Number.isNaN(val)) return;
+
+  if(val === expected){
     msgEl.textContent="Bravo 🎉";
     rewardEl.textContent = rewards[rand(rewards.length)];
     speak("Bravo !");
     stars--;
     updateStars();
-    if(stars===0) nextLevel();
-    else setTimeout(newQ,900);
+    if(stars === 0) nextLevel();
+    else setTimeout(newQ, 900);
   } else {
     msgEl.textContent="Essaie encore 🙂";
     speak("Essaie encore");
+    answerEl.select();
   }
 }
 
-checkBtn.addEventListener('click',check);
-answerEl.addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+checkBtn.addEventListener('click', check);
+answerEl.addEventListener('keydown', e => { if(e.key === 'Enter') check(); });
 
 updateStars();
 newQ();
