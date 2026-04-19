@@ -3,187 +3,549 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Math 6 ans</title>
+<title>Jeu de maths</title>
 
 <style>
-  body { font-family: system-ui; margin:0; background:#f4f6fb; }
-  .wrap { max-width:760px; margin:auto; padding:16px; }
-  .card { background:#fff; border-radius:20px; padding:16px; box-shadow:0 8px 20px rgba(0,0,0,.1); text-align:center;}
-  .question { font-size:48px; font-weight:900; margin:10px 0; }
-  .dotsRow { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin:10px 0; }
-  .dot { width:18px; height:18px; border-radius:50%; border:2px solid #333; }
-  .msg { font-size:22px; min-height:30px; margin-top:8px; }
-  .reward { font-size:80px; margin-top:10px; height:90px; }
-  .stars { font-size:26px; margin-top:6px; }
-  input { font-size:24px; padding:10px; width:260px; text-align:center; border-radius:12px; border:1px solid #ccc; }
-  button { font-size:20px; padding:10px 14px; border-radius:12px; border:0; background:#2f6fed; color:white; margin-top:8px; }
-  .hint { font-size:14px; color:#556; margin-top:8px; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin: 0;
+    background: #f4f6fb;
+  }
+
+  .wrap {
+    max-width: 820px;
+    margin: auto;
+    padding: 16px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.10);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  h1 {
+    margin: 0 0 10px 0;
+  }
+
+  .topbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  input, select, button {
+    font-size: 18px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #cfd6e4;
+  }
+
+  input[type="text"] {
+    width: 220px;
+    text-align: center;
+  }
+
+  .small {
+    font-size: 14px;
+  }
+
+  button {
+    background: #2f6fed;
+    color: white;
+    border: 0;
+  }
+
+  button.secondary {
+    background: #e8edf9;
+    color: #1d2a44;
+  }
+
+  button:disabled {
+    opacity: .55;
+  }
+
+  .question {
+    font-size: 54px;
+    font-weight: 900;
+    margin: 12px 0;
+  }
+
+  .dotsRow {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+    min-height: 28px;
+  }
+
+  .dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #333;
+    background: white;
+  }
+
+  .answerRow {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  #answer {
+    font-size: 26px;
+    width: 240px;
+    text-align: center;
+  }
+
+  .msg {
+    font-size: 24px;
+    min-height: 34px;
+    margin-top: 10px;
+  }
+
+  .reward {
+    font-size: 84px;
+    min-height: 90px;
+    margin-top: 6px;
+  }
+
+  .stats {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 18px;
+  }
+
+  .badge {
+    background: #eef3ff;
+    color: #24324d;
+    border-radius: 999px;
+    padding: 8px 12px;
+  }
+
+  .fireworks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+    overflow: hidden;
+  }
+
+  .burst {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    opacity: 0;
+    animation: explode 1.2s ease-out forwards;
+  }
+
+  @keyframes explode {
+    0% {
+      transform: translate(0,0) scale(0.2);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--dx), var(--dy)) scale(1.8);
+      opacity: 0;
+    }
+  }
+
+  .levelLine {
+    font-size: 16px;
+    color: #4d5d7a;
+    margin-bottom: 8px;
+  }
 </style>
 </head>
-
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>🧸 Math 6 ans</h1>
-    <div class="stars" id="stars">⭐⭐⭐⭐⭐</div>
+    <h1>🧮 Jeu de maths</h1>
+
+    <div class="topbar">
+      <input id="childName" type="text" placeholder="Nom de l’enfant">
+      <select id="mode">
+        <option value="add">Addition</option>
+        <option value="sub">Soustraction</option>
+        <option value="mul">Multiplication</option>
+        <option value="div">Division</option>
+        <option value="mix">Mélange des 4</option>
+      </select>
+      <select id="range">
+        <option value="0-10">Niveau 0-10</option>
+        <option value="10-20">Niveau 10-20</option>
+        <option value="20-50">Niveau 20-50</option>
+      </select>
+      <button id="startBtn" class="secondary" type="button">Commencer</button>
+      <button id="repeatBtn" class="secondary" type="button">🔊 Répéter</button>
+    </div>
+
+    <div class="levelLine" id="levelLine">Choisis un nom, un mode et un niveau.</div>
+
     <div class="question" id="q">—</div>
     <div class="dotsRow" id="dots"></div>
 
-    <div class="hint">
-      Touche la case et utilise le 🎤 du clavier. Dis “douze” → 12.
+    <div class="answerRow">
+      <input id="answer" type="text" placeholder="Réponse">
+      <button id="checkBtn" type="button">Vérifier</button>
     </div>
-
-    <input id="answer" type="text" placeholder="Ta réponse">
-    <br>
-    <button id="checkBtn" type="button">Vérifier</button>
 
     <div class="msg" id="msg"></div>
     <div class="reward" id="reward"></div>
+
+    <div class="stats">
+      <div class="badge">✅ Bonnes: <span id="okCount">0</span></div>
+      <div class="badge">🎯 Objectif: 10</div>
+      <div class="badge">👤 <span id="playerLabel">Joueur</span></div>
+    </div>
+
+    <div class="fireworks" id="fireworks"></div>
   </div>
 </div>
 
 <script>
-let level = 1, stars = 5, a, b, op, expected;
+let a = 0;
+let b = 0;
+let op = '+';
+let expected = 0;
+let correctCount = 0;
+let locked = false;
 
-const rewards = ["🐶","🐱","🦊","🐼","🐸","🐵","🦁","🐯","🚗","🚀","🦕","🦖","🦄","🐙","🐠"];
-
-const qEl = document.getElementById('q');
-const msgEl = document.getElementById('msg');
-const dotsEl = document.getElementById('dots');
-const starsEl = document.getElementById('stars');
-const rewardEl = document.getElementById('reward');
-const answerEl = document.getElementById('answer');
-const checkBtn = document.getElementById('checkBtn');
+const rewards = ["🐶","🐱","🦊","🐼","🐸","🐵","🦁","🐯","🚗","🚀","🦕","🦖","🦄","🐙","🐠","⭐"];
+const goodPhrases = [
+  "Bravo",
+  "Super",
+  "Excellent",
+  "Très bien",
+  "Génial"
+];
+const retryPhrases = [
+  "Essaie encore",
+  "Recommence",
+  "Tu es capable",
+  "On réessaie"
+];
 
 const FR_NUM = new Map([
   ["zéro",0],["zero",0],["un",1],["deux",2],["trois",3],["quatre",4],
   ["cinq",5],["six",6],["sept",7],["huit",8],["neuf",9],["dix",10],
   ["onze",11],["douze",12],["treize",13],["quatorze",14],["quinze",15],
-  ["seize",16],["dix sept",17],["dix-sept",17],
-  ["dix huit",18],["dix-huit",18],
-  ["dix neuf",19],["dix-neuf",19],
-  ["vingt",20],["vingt et un",21],["vingt-et-un",21],
-  ["vingt deux",22],["vingt-deux",22],
-  ["vingt trois",23],["vingt-trois",23],
-  ["vingt quatre",24],["vingt-quatre",24],
-  ["vingt cinq",25],["vingt-cinq",25],
-  ["vingt six",26],["vingt-six",26],
-  ["vingt sept",27],["vingt-sept",27],
-  ["vingt huit",28],["vingt-huit",28],
-  ["vingt neuf",29],["vingt-neuf",29],
-  ["trente",30]
+  ["seize",16],["dix sept",17],["dix-sept",17],["dix huit",18],["dix-huit",18],
+  ["dix neuf",19],["dix-neuf",19],["vingt",20],["vingt et un",21],["vingt-et-un",21],
+  ["vingt deux",22],["vingt-deux",22],["vingt trois",23],["vingt-trois",23],
+  ["vingt quatre",24],["vingt-quatre",24],["vingt cinq",25],["vingt-cinq",25],
+  ["vingt six",26],["vingt-six",26],["vingt sept",27],["vingt-sept",27],
+  ["vingt huit",28],["vingt-huit",28],["vingt neuf",29],["vingt-neuf",29],
+  ["trente",30],["quarante",40],["cinquante",50]
 ]);
 
-function normalize(s){
-  return (s||"").toLowerCase().trim().replace(/[’']/g," ").replace(/\s+/g," ");
+const childNameEl = document.getElementById('childName');
+const modeEl = document.getElementById('mode');
+const rangeEl = document.getElementById('range');
+const startBtn = document.getElementById('startBtn');
+const repeatBtn = document.getElementById('repeatBtn');
+const qEl = document.getElementById('q');
+const dotsEl = document.getElementById('dots');
+const answerEl = document.getElementById('answer');
+const checkBtn = document.getElementById('checkBtn');
+const msgEl = document.getElementById('msg');
+const rewardEl = document.getElementById('reward');
+const okCountEl = document.getElementById('okCount');
+const playerLabelEl = document.getElementById('playerLabel');
+const levelLineEl = document.getElementById('levelLine');
+const fireworksEl = document.getElementById('fireworks');
+
+function normalize(s) {
+  return (s || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[’']/g, " ")
+    .replace(/\s+/g, " ");
 }
 
-function applyDictationFix(){
+function getChildName() {
+  const name = childNameEl.value.trim();
+  return name || "mon champion";
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'fr-CA';
+  u.rate = 0.92;
+  speechSynthesis.speak(u);
+}
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function parseRange() {
+  const raw = rangeEl.value;
+  const [minStr, maxStr] = raw.split('-');
+  return {
+    min: parseInt(minStr, 10),
+    max: parseInt(maxStr, 10)
+  };
+}
+
+function currentMode() {
+  const m = modeEl.value;
+  if (m !== 'mix') return m;
+  const all = ['add', 'sub', 'mul', 'div'];
+  return all[randInt(0, all.length - 1)];
+}
+
+function updateHeader() {
+  playerLabelEl.textContent = getChildName();
+  levelLineEl.textContent = `${getChildName()} joue en mode ${modeEl.options[modeEl.selectedIndex].text.toLowerCase()} — niveau ${rangeEl.value}`;
+}
+
+function applyDictationFix() {
   const raw = normalize(answerEl.value);
 
-  if(FR_NUM.has(raw)){
-    answerEl.value = FR_NUM.get(raw);
+  if (FR_NUM.has(raw)) {
+    answerEl.value = String(FR_NUM.get(raw));
     return;
   }
 
-  const digits = raw.replace(/\D+/g,'');
-  if(digits.length>0){
+  const digits = raw.replace(/\D+/g, '');
+  if (digits.length > 0) {
     answerEl.value = digits;
   }
 }
 
-// Watcher rapide pendant 2s après focus (fix iPad)
-let timer=null, endAt=0;
-function startWatcher(){
-  endAt = Date.now()+2000;
-  timer = setInterval(()=>{
+let watcher = null;
+let watcherEnd = 0;
+
+function startWatcher() {
+  stopWatcher();
+  watcherEnd = Date.now() + 2000;
+  watcher = setInterval(() => {
     applyDictationFix();
-    if(Date.now()>endAt) clearInterval(timer);
-  },40);
-}
-answerEl.addEventListener("focus",startWatcher);
-["input","change","keyup","blur"].forEach(e=>{
-  answerEl.addEventListener(e,()=>setTimeout(applyDictationFix,0));
-});
-
-function speak(t){
-  if(!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(t);
-  u.lang='fr-CA';
-  speechSynthesis.speak(u);
+    if (Date.now() >= watcherEnd) stopWatcher();
+  }, 40);
 }
 
-function rand(n){return Math.floor(Math.random()*n);}
+function stopWatcher() {
+  if (watcher) clearInterval(watcher);
+  watcher = null;
+}
 
-function drawDots(n){
-  dotsEl.innerHTML='';
-  for(let i=0;i<n;i++){
-    const d=document.createElement('div');
-    d.className='dot';
+function drawDots(n) {
+  dotsEl.innerHTML = '';
+  if (n > 20) return; // évite trop de points pour les grands nombres
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
     dotsEl.appendChild(d);
   }
 }
 
-function updateStars(){starsEl.textContent='⭐'.repeat(stars);}
+function symbolForMode(mode) {
+  if (mode === 'add') return '+';
+  if (mode === 'sub') return '−';
+  if (mode === 'mul') return '×';
+  return '÷';
+}
 
-function newQ(){
-  rewardEl.textContent='';
-  msgEl.textContent='';
-  answerEl.value='';
-
-  const max=level*10;
-  op=Math.random()<0.5?'+':'−';
-  a=rand(max); b=rand(max);
-  if(op==='−'&&b>a)[a,b]=[b,a];
-
-  expected=op==='+'?a+b:a-b;
-
-  qEl.textContent=`${a} ${op} ${b} = ?`;
-  drawDots(op==='+'?(a+b):a);
-  speak(`${a} ${op==='+'?'plus':'moins'} ${b}`);
+function newQuestion() {
+  updateHeader();
+  msgEl.textContent = '';
+  rewardEl.textContent = '';
+  answerEl.value = '';
   answerEl.focus();
+  startWatcher();
+
+  const { min, max } = parseRange();
+  const mode = currentMode();
+
+  if (mode === 'add') {
+    a = randInt(min, max);
+    b = randInt(min, max);
+    op = '+';
+    expected = a + b;
+    drawDots(expected <= 20 ? expected : 0);
+  }
+
+  if (mode === 'sub') {
+    a = randInt(min, max);
+    b = randInt(min, max);
+    if (b > a) [a, b] = [b, a];
+    op = '−';
+    expected = a - b;
+    drawDots(a <= 20 ? a : 0);
+  }
+
+  if (mode === 'mul') {
+    const mulMax = max <= 10 ? 10 : (max <= 20 ? 12 : 15);
+    a = randInt(0, Math.min(10, mulMax));
+    b = randInt(0, Math.min(10, mulMax));
+    op = '×';
+    expected = a * b;
+    drawDots(0);
+  }
+
+  if (mode === 'div') {
+    const divisor = randInt(1, Math.min(10, max));
+    const quotient = randInt(0, Math.min(10, max));
+    a = divisor * quotient;
+    b = divisor;
+    op = '÷';
+    expected = quotient;
+    drawDots(0);
+  }
+
+  qEl.textContent = `${a} ${op} ${b} = ?`;
+  speakQuestion();
 }
 
-function nextLevel(){
-  level++;
-  stars=5;
-  updateStars();
-  msgEl.textContent="🏆 Nouveau niveau !";
-  speak("Nouveau niveau !");
-  setTimeout(newQ,1500);
+function speakQuestion() {
+  const word =
+    op === '+' ? 'plus' :
+    op === '−' ? 'moins' :
+    op === '×' ? 'fois' :
+    'divisé par';
+
+  speak(`${a} ${word} ${b}`);
 }
 
-function check(){
+function launchFireworks() {
+  fireworksEl.innerHTML = '';
+  fireworksEl.style.display = 'block';
+
+  const colors = ['#ff4d4f', '#faad14', '#36cfc9', '#597ef7', '#eb2f96', '#73d13d'];
+
+  for (let burst = 0; burst < 8; burst++) {
+    const centerX = randInt(10, 90);
+    const centerY = randInt(10, 55);
+
+    for (let i = 0; i < 14; i++) {
+      const p = document.createElement('div');
+      p.className = 'burst';
+      p.style.left = centerX + '%';
+      p.style.top = centerY + '%';
+      p.style.background = colors[randInt(0, colors.length - 1)];
+      const dx = randInt(-120, 120) + 'px';
+      const dy = randInt(-120, 120) + 'px';
+      p.style.setProperty('--dx', dx);
+      p.style.setProperty('--dy', dy);
+      fireworksEl.appendChild(p);
+    }
+  }
+
+  setTimeout(() => {
+    fireworksEl.style.display = 'none';
+    fireworksEl.innerHTML = '';
+  }, 1600);
+}
+
+function finishSeries() {
+  locked = true;
+  msgEl.textContent = `🎉 Bravo ${getChildName()} ! Tu as réussi 10 questions !`;
+  rewardEl.textContent = '🏆';
+  speak(`Bravo ${getChildName()} ! Tu as réussi dix questions !`);
+  launchFireworks();
+
+  setTimeout(() => {
+    correctCount = 0;
+    okCountEl.textContent = correctCount;
+    locked = false;
+    newQuestion();
+  }, 3000);
+}
+
+function goodMessage() {
+  return goodPhrases[randInt(0, goodPhrases.length - 1)];
+}
+
+function retryMessage() {
+  return retryPhrases[randInt(0, retryPhrases.length - 1)];
+}
+
+function checkAnswer() {
+  if (locked) return;
+
   applyDictationFix();
-  const val=parseInt(answerEl.value);
-  if(isNaN(val))return;
+  const val = parseInt(answerEl.value, 10);
+  if (Number.isNaN(val)) return;
 
-  if(val===expected){
-    msgEl.textContent="Bravo 🎉";
-    rewardEl.textContent=rewards[rand(rewards.length)];
-    speak("Bravo !");
-    stars--;
-    updateStars();
+  locked = true;
 
-    setTimeout(()=>{
-      if(stars===0)nextLevel();
-      else newQ();
-    },3000);
+  if (val === expected) {
+    correctCount++;
+    okCountEl.textContent = correctCount;
+    rewardEl.textContent = rewards[randInt(0, rewards.length - 1)];
 
-  }else{
-    msgEl.textContent="Essaie encore 🙂";
-    speak("Essaie encore");
+    const text = `${goodMessage()} ${getChildName()} !`;
+    msgEl.textContent = text;
+    speak(text);
 
-    setTimeout(()=>answerEl.select(),2000);
+    if (correctCount >= 10) {
+      setTimeout(() => {
+        finishSeries();
+      }, 2200);
+      return;
+    }
+
+    setTimeout(() => {
+      locked = false;
+      newQuestion();
+    }, 2200);
+
+  } else {
+    rewardEl.textContent = '';
+    const text = `${retryMessage()}, ${getChildName()} !`;
+    msgEl.textContent = text;
+    speak(text);
+
+    setTimeout(() => {
+      locked = false;
+      answerEl.focus();
+      answerEl.select();
+    }, 1800);
   }
 }
 
-checkBtn.addEventListener('click',check);
-answerEl.addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+startBtn.addEventListener('click', () => {
+  correctCount = 0;
+  okCountEl.textContent = correctCount;
+  updateHeader();
+  newQuestion();
+});
 
-updateStars();
-newQ();
-</script>
-</body>
-</html>
+repeatBtn.addEventListener('click', () => {
+  speakQuestion();
+});
+
+checkBtn.addEventListener('click', checkAnswer);
+
+answerEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') checkAnswer();
+});
+
+answerEl.addEventListener('focus', startWatcher);
+['input', 'change', 'keyup', 'blur'].forEach(evt => {
+  answerEl.addEventListener(evt, () => setTimeout(applyDictationFix, 0));
+});
+
+childNameEl.addEventListener('change', updateHeader);
+modeEl.addEventListener('change', updateHeader);
+rangeEl.addEventListener('change', updateHeader);
+
+updateHeader();
