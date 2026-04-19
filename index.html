@@ -4,213 +4,275 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Jeu de maths</title>
-
 <style>
-  body {
+  body{
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    margin: 0;
-    background: #f4f6fb;
+    margin:0;
+    background:#f4f6fb;
+    color:#1f2a44;
   }
 
-  .wrap {
-    max-width: 820px;
-    margin: auto;
-    padding: 16px;
+  .wrap{
+    max-width:900px;
+    margin:auto;
+    padding:16px;
   }
 
-  .card {
-    background: white;
-    border-radius: 22px;
-    padding: 18px;
-    box-shadow: 0 8px 20px rgba(0,0,0,.10);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+  .card{
+    background:#fff;
+    border-radius:24px;
+    padding:18px;
+    box-shadow:0 10px 24px rgba(0,0,0,.10);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
   }
 
-  h1 {
-    margin: 0 0 10px 0;
+  h1{
+    margin:0 0 10px 0;
+    font-size:34px;
   }
 
-  .topbar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 10px;
+  h2{
+    margin:0 0 10px 0;
+    font-size:28px;
   }
 
-  input, select, button {
-    font-size: 18px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid #cfd6e4;
+  .screen{
+    display:none;
   }
 
-  input[type="text"] {
-    width: 220px;
-    text-align: center;
+  .screen.active{
+    display:block;
   }
 
-  .small {
-    font-size: 14px;
+  .intro{
+    font-size:18px;
+    color:#4b5d7d;
+    margin-bottom:16px;
   }
 
-  button {
-    background: #2f6fed;
-    color: white;
-    border: 0;
+  .row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:14px;
   }
 
-  button.secondary {
-    background: #e8edf9;
-    color: #1d2a44;
+  input, select, button{
+    font-size:20px;
+    padding:12px 14px;
+    border-radius:14px;
+    border:1px solid #d1d8e6;
   }
 
-  button:disabled {
-    opacity: .55;
+  input[type="text"]{
+    width:260px;
+    text-align:center;
   }
 
-  .question {
-    font-size: 54px;
-    font-weight: 900;
-    margin: 12px 0;
+  .big-btn{
+    min-width:180px;
+    min-height:64px;
+    border:0;
+    color:white;
+    font-weight:700;
+    font-size:22px;
   }
 
-  .dotsRow {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin: 12px 0;
-    min-height: 28px;
+  .add{ background:#2f80ed; }
+  .sub{ background:#9b51e0; }
+  .mul{ background:#27ae60; }
+  .div{ background:#f2994a; }
+  .mix{ background:#eb5757; }
+
+  .secondary{
+    background:#eaf0fb;
+    color:#24324d;
+    border:0;
   }
 
-  .dot {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 2px solid #333;
-    background: white;
+  .primary{
+    background:#2f6fed;
+    color:white;
+    border:0;
+    font-weight:700;
   }
 
-  .answerRow {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 6px;
+  .selected{
+    outline:5px solid rgba(0,0,0,.08);
+    transform:scale(1.03);
   }
 
-  #answer {
-    font-size: 26px;
-    width: 240px;
-    text-align: center;
+  .question{
+    font-size:58px;
+    font-weight:900;
+    margin:14px 0 10px 0;
   }
 
-  .msg {
-    font-size: 24px;
-    min-height: 34px;
-    margin-top: 10px;
+  .dotsRow{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    flex-wrap:wrap;
+    min-height:28px;
+    margin:10px 0;
   }
 
-  .reward {
-    font-size: 84px;
-    min-height: 90px;
-    margin-top: 6px;
+  .dot{
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    border:2px solid #2d3748;
+    background:#fff;
   }
 
-  .stats {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    font-size: 18px;
+  .answerRow{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:10px;
   }
 
-  .badge {
-    background: #eef3ff;
-    color: #24324d;
-    border-radius: 999px;
-    padding: 8px 12px;
+  #answer{
+    font-size:28px;
+    width:240px;
+    text-align:center;
   }
 
-  .fireworks {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    display: none;
-    overflow: hidden;
+  .msg{
+    font-size:26px;
+    min-height:40px;
+    margin-top:12px;
   }
 
-  .burst {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    opacity: 0;
-    animation: explode 1.2s ease-out forwards;
+  .reward{
+    font-size:84px;
+    min-height:90px;
+    margin-top:4px;
   }
 
-  @keyframes explode {
-    0% {
-      transform: translate(0,0) scale(0.2);
-      opacity: 1;
+  .stats{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:10px;
+  }
+
+  .badge{
+    background:#eef3ff;
+    color:#24324d;
+    border-radius:999px;
+    padding:8px 14px;
+    font-size:18px;
+  }
+
+  .top-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:8px;
+  }
+
+  .fireworks{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    display:none;
+    overflow:hidden;
+  }
+
+  .burst{
+    position:absolute;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    opacity:0;
+    animation:explode 1.2s ease-out forwards;
+  }
+
+  @keyframes explode{
+    0%{
+      transform:translate(0,0) scale(.2);
+      opacity:1;
     }
-    100% {
-      transform: translate(var(--dx), var(--dy)) scale(1.8);
-      opacity: 0;
+    100%{
+      transform:translate(var(--dx), var(--dy)) scale(1.8);
+      opacity:0;
     }
   }
 
-  .levelLine {
-    font-size: 16px;
-    color: #4d5d7a;
-    margin-bottom: 8px;
+  .small-note{
+    font-size:15px;
+    color:#5b6c89;
+    margin-top:6px;
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>🧮 Jeu de maths</h1>
 
-    <div class="topbar">
-      <input id="childName" type="text" placeholder="Nom de l’enfant">
-      <select id="mode">
-        <option value="add">Addition</option>
-        <option value="sub">Soustraction</option>
-        <option value="mul">Multiplication</option>
-        <option value="div">Division</option>
-        <option value="mix">Mélange des 4</option>
-      </select>
-      <select id="range">
-        <option value="0-10">Niveau 0-10</option>
-        <option value="10-20">Niveau 10-20</option>
-        <option value="20-50">Niveau 20-50</option>
-      </select>
-      <button id="startBtn" class="secondary" type="button">Commencer</button>
-      <button id="repeatBtn" class="secondary" type="button">🔊 Répéter</button>
+    <!-- ÉCRAN D’ACCUEIL -->
+    <div id="homeScreen" class="screen active">
+      <h1>🧮 Jeu de maths</h1>
+      <div class="intro">Choisis ton nom, ton jeu et ton niveau.</div>
+
+      <div class="row">
+        <input id="childName" type="text" placeholder="Nom de l’enfant">
+      </div>
+
+      <h2>Choisis ton jeu</h2>
+      <div class="row">
+        <button class="big-btn add" data-mode="add">➕ Addition</button>
+        <button class="big-btn sub" data-mode="sub">➖ Soustraction</button>
+        <button class="big-btn mul" data-mode="mul">✖️ Multiplication</button>
+        <button class="big-btn div" data-mode="div">➗ Division</button>
+        <button class="big-btn mix" data-mode="mix">🎲 Mélange</button>
+      </div>
+
+      <h2>Choisis ton niveau</h2>
+      <div class="row">
+        <button class="big-btn secondary level-btn" data-range="0-10">0–10</button>
+        <button class="big-btn secondary level-btn" data-range="10-20">10–20</button>
+        <button class="big-btn secondary level-btn" data-range="20-50">20–50</button>
+      </div>
+
+      <div class="row">
+        <button id="playBtn" class="big-btn primary">▶️ Jouer</button>
+      </div>
+
+      <div class="small-note">Après 10 bonnes réponses, un feu d’artifice apparaît 🎆</div>
     </div>
 
-    <div class="levelLine" id="levelLine">Choisis un nom, un mode et un niveau.</div>
+    <!-- ÉCRAN DE JEU -->
+    <div id="gameScreen" class="screen">
+      <div class="top-actions">
+        <button id="changeChoicesBtn" class="secondary" type="button">🔁 Changer les choix</button>
+        <button id="repeatBtn" class="secondary" type="button">🔊 Répéter</button>
+      </div>
 
-    <div class="question" id="q">—</div>
-    <div class="dotsRow" id="dots"></div>
+      <div class="stats">
+        <div class="badge">👤 <span id="playerLabel">Joueur</span></div>
+        <div class="badge">🎯 Mode: <span id="modeLabel">Addition</span></div>
+        <div class="badge">📚 Niveau: <span id="rangeLabel">0-10</span></div>
+        <div class="badge">✅ Bonnes: <span id="okCount">0</span>/10</div>
+      </div>
 
-    <div class="answerRow">
-      <input id="answer" type="text" placeholder="Réponse">
-      <button id="checkBtn" type="button">Vérifier</button>
-    </div>
+      <div class="question" id="q">—</div>
+      <div class="dotsRow" id="dots"></div>
 
-    <div class="msg" id="msg"></div>
-    <div class="reward" id="reward"></div>
+      <div class="answerRow">
+        <input id="answer" type="text" placeholder="Réponse">
+        <button id="checkBtn" class="primary" type="button">Vérifier</button>
+      </div>
 
-    <div class="stats">
-      <div class="badge">✅ Bonnes: <span id="okCount">0</span></div>
-      <div class="badge">🎯 Objectif: 10</div>
-      <div class="badge">👤 <span id="playerLabel">Joueur</span></div>
+      <div class="msg" id="msg"></div>
+      <div class="reward" id="reward"></div>
     </div>
 
     <div class="fireworks" id="fireworks"></div>
@@ -225,20 +287,12 @@ let expected = 0;
 let correctCount = 0;
 let locked = false;
 
+let selectedMode = 'add';
+let selectedRange = '0-10';
+
 const rewards = ["🐶","🐱","🦊","🐼","🐸","🐵","🦁","🐯","🚗","🚀","🦕","🦖","🦄","🐙","🐠","⭐"];
-const goodPhrases = [
-  "Bravo",
-  "Super",
-  "Excellent",
-  "Très bien",
-  "Génial"
-];
-const retryPhrases = [
-  "Essaie encore",
-  "Recommence",
-  "Tu es capable",
-  "On réessaie"
-];
+const goodPhrases = ["Bravo","Super","Excellent","Très bien","Génial"];
+const retryPhrases = ["Essaie encore","Recommence","Tu es capable","On réessaie"];
 
 const FR_NUM = new Map([
   ["zéro",0],["zero",0],["un",1],["deux",2],["trois",3],["quatre",4],
@@ -253,11 +307,14 @@ const FR_NUM = new Map([
   ["trente",30],["quarante",40],["cinquante",50]
 ]);
 
+const homeScreen = document.getElementById('homeScreen');
+const gameScreen = document.getElementById('gameScreen');
+
 const childNameEl = document.getElementById('childName');
-const modeEl = document.getElementById('mode');
-const rangeEl = document.getElementById('range');
-const startBtn = document.getElementById('startBtn');
+const playBtn = document.getElementById('playBtn');
 const repeatBtn = document.getElementById('repeatBtn');
+const changeChoicesBtn = document.getElementById('changeChoicesBtn');
+
 const qEl = document.getElementById('q');
 const dotsEl = document.getElementById('dots');
 const answerEl = document.getElementById('answer');
@@ -266,10 +323,14 @@ const msgEl = document.getElementById('msg');
 const rewardEl = document.getElementById('reward');
 const okCountEl = document.getElementById('okCount');
 const playerLabelEl = document.getElementById('playerLabel');
-const levelLineEl = document.getElementById('levelLine');
+const modeLabelEl = document.getElementById('modeLabel');
+const rangeLabelEl = document.getElementById('rangeLabel');
 const fireworksEl = document.getElementById('fireworks');
 
-function normalize(s) {
+const modeButtons = document.querySelectorAll('[data-mode]');
+const levelButtons = document.querySelectorAll('.level-btn');
+
+function normalize(s){
   return (s || "")
     .toLowerCase()
     .trim()
@@ -277,13 +338,12 @@ function normalize(s) {
     .replace(/\s+/g, " ");
 }
 
-function getChildName() {
-  const name = childNameEl.value.trim();
-  return name || "mon champion";
+function getChildName(){
+  return childNameEl.value.trim() || "mon champion";
 }
 
-function speak(text) {
-  if (!('speechSynthesis' in window)) return;
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'fr-CA';
@@ -291,41 +351,55 @@ function speak(text) {
   speechSynthesis.speak(u);
 }
 
-function randInt(min, max) {
+function randInt(min, max){
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function parseRange() {
-  const raw = rangeEl.value;
-  const [minStr, maxStr] = raw.split('-');
-  return {
-    min: parseInt(minStr, 10),
-    max: parseInt(maxStr, 10)
-  };
+function parseRange(){
+  const [minStr, maxStr] = selectedRange.split('-');
+  return { min: parseInt(minStr, 10), max: parseInt(maxStr, 10) };
 }
 
-function currentMode() {
-  const m = modeEl.value;
-  if (m !== 'mix') return m;
-  const all = ['add', 'sub', 'mul', 'div'];
+function actualMode(){
+  if(selectedMode !== 'mix') return selectedMode;
+  const all = ['add','sub','mul','div'];
   return all[randInt(0, all.length - 1)];
 }
 
-function updateHeader() {
-  playerLabelEl.textContent = getChildName();
-  levelLineEl.textContent = `${getChildName()} joue en mode ${modeEl.options[modeEl.selectedIndex].text.toLowerCase()} — niveau ${rangeEl.value}`;
+function modeLabel(mode){
+  if(mode === 'add') return 'Addition';
+  if(mode === 'sub') return 'Soustraction';
+  if(mode === 'mul') return 'Multiplication';
+  if(mode === 'div') return 'Division';
+  return 'Mélange';
 }
 
-function applyDictationFix() {
+function updateLabels(){
+  playerLabelEl.textContent = getChildName();
+  modeLabelEl.textContent = modeLabel(selectedMode);
+  rangeLabelEl.textContent = selectedRange;
+}
+
+function showHome(){
+  homeScreen.classList.add('active');
+  gameScreen.classList.remove('active');
+}
+
+function showGame(){
+  homeScreen.classList.remove('active');
+  gameScreen.classList.add('active');
+}
+
+function applyDictationFix(){
   const raw = normalize(answerEl.value);
 
-  if (FR_NUM.has(raw)) {
+  if(FR_NUM.has(raw)){
     answerEl.value = String(FR_NUM.get(raw));
     return;
   }
 
   const digits = raw.replace(/\D+/g, '');
-  if (digits.length > 0) {
+  if(digits.length > 0){
     answerEl.value = digits;
   }
 }
@@ -333,39 +407,42 @@ function applyDictationFix() {
 let watcher = null;
 let watcherEnd = 0;
 
-function startWatcher() {
+function startWatcher(){
   stopWatcher();
   watcherEnd = Date.now() + 2000;
   watcher = setInterval(() => {
     applyDictationFix();
-    if (Date.now() >= watcherEnd) stopWatcher();
+    if(Date.now() >= watcherEnd) stopWatcher();
   }, 40);
 }
 
-function stopWatcher() {
-  if (watcher) clearInterval(watcher);
+function stopWatcher(){
+  if(watcher) clearInterval(watcher);
   watcher = null;
 }
 
-function drawDots(n) {
+function drawDots(n){
   dotsEl.innerHTML = '';
-  if (n > 20) return; // évite trop de points pour les grands nombres
-  for (let i = 0; i < n; i++) {
+  if(n <= 0 || n > 20) return;
+  for(let i = 0; i < n; i++){
     const d = document.createElement('div');
     d.className = 'dot';
     dotsEl.appendChild(d);
   }
 }
 
-function symbolForMode(mode) {
-  if (mode === 'add') return '+';
-  if (mode === 'sub') return '−';
-  if (mode === 'mul') return '×';
-  return '÷';
+function speakQuestion(){
+  const word =
+    op === '+' ? 'plus' :
+    op === '−' ? 'moins' :
+    op === '×' ? 'fois' :
+    'divisé par';
+
+  speak(`${a} ${word} ${b}`);
 }
 
-function newQuestion() {
-  updateHeader();
+function newQuestion(){
+  updateLabels();
   msgEl.textContent = '';
   rewardEl.textContent = '';
   answerEl.value = '';
@@ -373,9 +450,9 @@ function newQuestion() {
   startWatcher();
 
   const { min, max } = parseRange();
-  const mode = currentMode();
+  const mode = actualMode();
 
-  if (mode === 'add') {
+  if(mode === 'add'){
     a = randInt(min, max);
     b = randInt(min, max);
     op = '+';
@@ -383,16 +460,16 @@ function newQuestion() {
     drawDots(expected <= 20 ? expected : 0);
   }
 
-  if (mode === 'sub') {
+  if(mode === 'sub'){
     a = randInt(min, max);
     b = randInt(min, max);
-    if (b > a) [a, b] = [b, a];
+    if(b > a) [a, b] = [b, a];
     op = '−';
     expected = a - b;
     drawDots(a <= 20 ? a : 0);
   }
 
-  if (mode === 'mul') {
+  if(mode === 'mul'){
     const mulMax = max <= 10 ? 10 : (max <= 20 ? 12 : 15);
     a = randInt(0, Math.min(10, mulMax));
     b = randInt(0, Math.min(10, mulMax));
@@ -401,7 +478,7 @@ function newQuestion() {
     drawDots(0);
   }
 
-  if (mode === 'div') {
+  if(mode === 'div'){
     const divisor = randInt(1, Math.min(10, max));
     const quotient = randInt(0, Math.min(10, max));
     a = divisor * quotient;
@@ -415,36 +492,24 @@ function newQuestion() {
   speakQuestion();
 }
 
-function speakQuestion() {
-  const word =
-    op === '+' ? 'plus' :
-    op === '−' ? 'moins' :
-    op === '×' ? 'fois' :
-    'divisé par';
-
-  speak(`${a} ${word} ${b}`);
-}
-
-function launchFireworks() {
+function launchFireworks(){
   fireworksEl.innerHTML = '';
   fireworksEl.style.display = 'block';
 
-  const colors = ['#ff4d4f', '#faad14', '#36cfc9', '#597ef7', '#eb2f96', '#73d13d'];
+  const colors = ['#ff4d4f','#faad14','#36cfc9','#597ef7','#eb2f96','#73d13d'];
 
-  for (let burst = 0; burst < 8; burst++) {
+  for(let burst = 0; burst < 8; burst++){
     const centerX = randInt(10, 90);
     const centerY = randInt(10, 55);
 
-    for (let i = 0; i < 14; i++) {
+    for(let i = 0; i < 14; i++){
       const p = document.createElement('div');
       p.className = 'burst';
       p.style.left = centerX + '%';
       p.style.top = centerY + '%';
       p.style.background = colors[randInt(0, colors.length - 1)];
-      const dx = randInt(-120, 120) + 'px';
-      const dy = randInt(-120, 120) + 'px';
-      p.style.setProperty('--dx', dx);
-      p.style.setProperty('--dy', dy);
+      p.style.setProperty('--dx', randInt(-120, 120) + 'px');
+      p.style.setProperty('--dy', randInt(-120, 120) + 'px');
       fireworksEl.appendChild(p);
     }
   }
@@ -455,7 +520,7 @@ function launchFireworks() {
   }, 1600);
 }
 
-function finishSeries() {
+function finishSeries(){
   locked = true;
   msgEl.textContent = `🎉 Bravo ${getChildName()} ! Tu as réussi 10 questions !`;
   rewardEl.textContent = '🏆';
@@ -467,39 +532,29 @@ function finishSeries() {
     okCountEl.textContent = correctCount;
     locked = false;
     newQuestion();
-  }, 3000);
+  }, 3200);
 }
 
-function goodMessage() {
-  return goodPhrases[randInt(0, goodPhrases.length - 1)];
-}
-
-function retryMessage() {
-  return retryPhrases[randInt(0, retryPhrases.length - 1)];
-}
-
-function checkAnswer() {
-  if (locked) return;
+function checkAnswer(){
+  if(locked) return;
 
   applyDictationFix();
   const val = parseInt(answerEl.value, 10);
-  if (Number.isNaN(val)) return;
+  if(Number.isNaN(val)) return;
 
   locked = true;
 
-  if (val === expected) {
+  if(val === expected){
     correctCount++;
     okCountEl.textContent = correctCount;
     rewardEl.textContent = rewards[randInt(0, rewards.length - 1)];
 
-    const text = `${goodMessage()} ${getChildName()} !`;
+    const text = `${goodPhrases[randInt(0, goodPhrases.length - 1)]} ${getChildName()} !`;
     msgEl.textContent = text;
     speak(text);
 
-    if (correctCount >= 10) {
-      setTimeout(() => {
-        finishSeries();
-      }, 2200);
+    if(correctCount >= 10){
+      setTimeout(finishSeries, 2200);
       return;
     }
 
@@ -510,7 +565,7 @@ function checkAnswer() {
 
   } else {
     rewardEl.textContent = '';
-    const text = `${retryMessage()}, ${getChildName()} !`;
+    const text = `${retryPhrases[randInt(0, retryPhrases.length - 1)]}, ${getChildName()} !`;
     msgEl.textContent = text;
     speak(text);
 
@@ -522,11 +577,32 @@ function checkAnswer() {
   }
 }
 
-startBtn.addEventListener('click', () => {
+modeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedMode = btn.dataset.mode;
+    modeButtons.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  });
+});
+
+levelButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedRange = btn.dataset.range;
+    levelButtons.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  });
+});
+
+playBtn.addEventListener('click', () => {
   correctCount = 0;
   okCountEl.textContent = correctCount;
-  updateHeader();
+  updateLabels();
+  showGame();
   newQuestion();
+});
+
+changeChoicesBtn.addEventListener('click', () => {
+  showHome();
 });
 
 repeatBtn.addEventListener('click', () => {
@@ -536,16 +612,18 @@ repeatBtn.addEventListener('click', () => {
 checkBtn.addEventListener('click', checkAnswer);
 
 answerEl.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') checkAnswer();
+  if(e.key === 'Enter') checkAnswer();
 });
 
 answerEl.addEventListener('focus', startWatcher);
-['input', 'change', 'keyup', 'blur'].forEach(evt => {
+['input','change','keyup','blur'].forEach(evt => {
   answerEl.addEventListener(evt, () => setTimeout(applyDictationFix, 0));
 });
 
-childNameEl.addEventListener('change', updateHeader);
-modeEl.addEventListener('change', updateHeader);
-rangeEl.addEventListener('change', updateHeader);
-
-updateHeader();
+// valeurs par défaut visuelles
+document.querySelector('[data-mode="add"]').classList.add('selected');
+document.querySelector('[data-range="0-10"]').classList.add('selected');
+updateLabels();
+</script>
+</body>
+</html>
