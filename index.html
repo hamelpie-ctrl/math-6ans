@@ -4,220 +4,276 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Jeu de maths</title>
+
 <style>
-  body{
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    margin:0;
-    background:#f4f6fb;
-    color:#1f2a44;
+body{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  margin:0;
+  background:#f4f6fb;
+  color:#1f2a44;
+}
+
+.wrap{
+  max-width:980px;
+  margin:auto;
+  padding:20px;
+}
+
+.card{
+  background:#fff;
+  border-radius:24px;
+  padding:28px 22px;
+  box-shadow:0 10px 24px rgba(0,0,0,.10);
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+
+.screen{display:none;}
+.screen.active{display:block;}
+
+h1{
+  margin:0 0 18px 0;
+  font-size:34px;
+}
+
+h2{
+  margin:10px 0 18px 0;
+  font-size:28px;
+}
+
+.intro{
+  font-size:18px;
+  color:#4b5d7d;
+  margin-bottom:24px;
+  line-height:1.5;
+}
+
+.row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-bottom:22px;
+}
+
+input,button{
+  font-size:20px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid #d1d8e6;
+}
+
+input[type="text"]{
+  width:260px;
+  text-align:center;
+}
+
+.big-btn{
+  min-width:170px;
+  min-height:62px;
+  border:0;
+  color:#fff;
+  font-weight:700;
+  font-size:22px;
+}
+
+.add{background:#2f80ed;}
+.sub{background:#9b51e0;}
+.mul{background:#27ae60;}
+.div{background:#f2994a;}
+.mix{background:#eb5757;}
+
+.primary{
+  background:#2f6fed;
+  color:#fff;
+  border:0;
+  font-weight:700;
+}
+
+.secondary{
+  background:#eaf0fb;
+  color:#24324d;
+  border:0;
+}
+
+.selected{
+  outline:5px solid rgba(0,0,0,.08);
+  transform:scale(1.03);
+}
+
+.top-actions{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+
+.stats{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:10px;
+  margin-bottom:20px;
+}
+
+.badge{
+  background:#eef3ff;
+  color:#24324d;
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:18px;
+}
+
+.question{
+  font-size:58px;
+  font-weight:900;
+  margin:26px 0 20px 0;
+}
+
+.dotsRow{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+  min-height:28px;
+  margin:18px 0 22px 0;
+}
+
+.dot{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:2px solid #2d3748;
+  background:#fff;
+}
+
+.answerRow{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:20px;
+  margin-bottom:20px;
+}
+
+#answer{
+  font-size:28px;
+  width:240px;
+  text-align:center;
+}
+
+.msg{
+  font-size:26px;
+  min-height:40px;
+  margin-top:22px;
+  line-height:1.5;
+}
+
+.reward{
+  font-size:84px;
+  min-height:100px;
+  margin-top:14px;
+  margin-bottom:16px;
+}
+
+.collection-box{
+  margin-top:26px;
+  background:#f8faff;
+  border:1px solid #dbe5f6;
+  border-radius:18px;
+  padding:18px;
+}
+
+.collection-title{
+  font-size:19px;
+  font-weight:700;
+  margin-bottom:12px;
+}
+
+.collection-status{
+  font-size:16px;
+  color:#566684;
+  margin-bottom:16px;
+  line-height:1.4;
+}
+
+.album-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));
+  gap:10px;
+}
+
+.album-card{
+  border:1px solid #d8e2f3;
+  border-radius:14px;
+  padding:10px 6px;
+  background:#fff;
+  min-height:86px;
+}
+
+.album-emoji{
+  font-size:34px;
+  line-height:1.2;
+}
+
+.album-name{
+  font-size:14px;
+  margin-top:4px;
+}
+
+.album-card.locked{
+  background:#f1f4fa;
+  color:#93a0b6;
+}
+
+.album-card.locked .album-emoji{
+  filter:grayscale(1);
+  opacity:.35;
+}
+
+.small-note{
+  font-size:15px;
+  color:#5b6c89;
+  margin-top:6px;
+  line-height:1.5;
+}
+
+.fireworks{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  display:none;
+  overflow:hidden;
+}
+
+.burst{
+  position:absolute;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  opacity:0;
+  animation:explode 1.2s ease-out forwards;
+}
+
+@keyframes explode{
+  0%{
+    transform:translate(0,0) scale(.2);
+    opacity:1;
   }
-
-  .wrap{
-    max-width:900px;
-    margin:auto;
-    padding:16px;
-  }
-
-  .card{
-    background:#fff;
-    border-radius:24px;
-    padding:18px;
-    box-shadow:0 10px 24px rgba(0,0,0,.10);
-    text-align:center;
-    position:relative;
-    overflow:hidden;
-  }
-
-  h1{
-    margin:0 0 10px 0;
-    font-size:34px;
-  }
-
-  h2{
-    margin:0 0 10px 0;
-    font-size:28px;
-  }
-
-  .screen{
-    display:none;
-  }
-
-  .screen.active{
-    display:block;
-  }
-
-  .intro{
-    font-size:18px;
-    color:#4b5d7d;
-    margin-bottom:16px;
-  }
-
-  .row{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    justify-content:center;
-    margin-bottom:14px;
-  }
-
-  input, select, button{
-    font-size:20px;
-    padding:12px 14px;
-    border-radius:14px;
-    border:1px solid #d1d8e6;
-  }
-
-  input[type="text"]{
-    width:260px;
-    text-align:center;
-  }
-
-  .big-btn{
-    min-width:180px;
-    min-height:64px;
-    border:0;
-    color:white;
-    font-weight:700;
-    font-size:22px;
-  }
-
-  .add{ background:#2f80ed; }
-  .sub{ background:#9b51e0; }
-  .mul{ background:#27ae60; }
-  .div{ background:#f2994a; }
-  .mix{ background:#eb5757; }
-
-  .secondary{
-    background:#eaf0fb;
-    color:#24324d;
-    border:0;
-  }
-
-  .primary{
-    background:#2f6fed;
-    color:white;
-    border:0;
-    font-weight:700;
-  }
-
-  .selected{
-    outline:5px solid rgba(0,0,0,.08);
-    transform:scale(1.03);
-  }
-
-  .question{
-    font-size:58px;
-    font-weight:900;
-    margin:14px 0 10px 0;
-  }
-
-  .dotsRow{
-    display:flex;
-    justify-content:center;
-    gap:6px;
-    flex-wrap:wrap;
-    min-height:28px;
-    margin:10px 0;
-  }
-
-  .dot{
-    width:18px;
-    height:18px;
-    border-radius:50%;
-    border:2px solid #2d3748;
-    background:#fff;
-  }
-
-  .answerRow{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    justify-content:center;
-    margin-top:10px;
-  }
-
-  #answer{
-    font-size:28px;
-    width:240px;
-    text-align:center;
-  }
-
-  .msg{
-    font-size:26px;
-    min-height:40px;
-    margin-top:12px;
-  }
-
-  .reward{
-    font-size:84px;
-    min-height:90px;
-    margin-top:4px;
-  }
-
-  .stats{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    justify-content:center;
-    margin-top:10px;
-  }
-
-  .badge{
-    background:#eef3ff;
-    color:#24324d;
-    border-radius:999px;
-    padding:8px 14px;
-    font-size:18px;
-  }
-
-  .top-actions{
-    display:flex;
-    gap:10px;
-    justify-content:center;
-    flex-wrap:wrap;
-    margin-bottom:8px;
-  }
-
-  .fireworks{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    display:none;
-    overflow:hidden;
-  }
-
-  .burst{
-    position:absolute;
-    width:12px;
-    height:12px;
-    border-radius:50%;
+  100%{
+    transform:translate(var(--dx), var(--dy)) scale(1.8);
     opacity:0;
-    animation:explode 1.2s ease-out forwards;
   }
-
-  @keyframes explode{
-    0%{
-      transform:translate(0,0) scale(.2);
-      opacity:1;
-    }
-    100%{
-      transform:translate(var(--dx), var(--dy)) scale(1.8);
-      opacity:0;
-    }
-  }
-
-  .small-note{
-    font-size:15px;
-    color:#5b6c89;
-    margin-top:6px;
-  }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
 
-    <!-- ÉCRAN D’ACCUEIL -->
     <div id="homeScreen" class="screen active">
       <h1>🧮 Jeu de maths</h1>
       <div class="intro">Choisis ton nom, ton jeu et ton niveau.</div>
@@ -246,14 +302,17 @@
         <button id="playBtn" class="big-btn primary">▶️ Jouer</button>
       </div>
 
-      <div class="small-note">Après 10 bonnes réponses, un feu d’artifice apparaît 🎆</div>
+      <div class="small-note">
+        Après 10 bonnes réponses, feu d’artifice + progression automatique 🎆<br>
+        L’album d’animaux est sauvegardé sur l’iPad.
+      </div>
     </div>
 
-    <!-- ÉCRAN DE JEU -->
     <div id="gameScreen" class="screen">
       <div class="top-actions">
         <button id="changeChoicesBtn" class="secondary" type="button">🔁 Changer les choix</button>
         <button id="repeatBtn" class="secondary" type="button">🔊 Répéter</button>
+        <button id="resetAlbumBtn" class="secondary" type="button">🧹 Réinitialiser l’album</button>
       </div>
 
       <div class="stats">
@@ -273,6 +332,12 @@
 
       <div class="msg" id="msg"></div>
       <div class="reward" id="reward"></div>
+
+      <div class="collection-box">
+        <div class="collection-title">🐾 Album d’animaux</div>
+        <div class="collection-status" id="collectionStatus">0 / 16 trouvés</div>
+        <div class="album-grid" id="albumGrid"></div>
+      </div>
     </div>
 
     <div class="fireworks" id="fireworks"></div>
@@ -280,6 +345,8 @@
 </div>
 
 <script>
+const STORAGE_KEY = "jeu-maths-album-v1";
+
 let a = 0;
 let b = 0;
 let op = '+';
@@ -290,9 +357,41 @@ let locked = false;
 let selectedMode = 'add';
 let selectedRange = '0-10';
 
-const rewards = ["🐶","🐱","🦊","🐼","🐸","🐵","🦁","🐯","🚗","🚀","🦕","🦖","🦄","🐙","🐠","⭐"];
-const goodPhrases = ["Bravo","Super","Excellent","Très bien","Génial"];
-const retryPhrases = ["Essaie encore","Recommence","Tu es capable","On réessaie"];
+const albumAnimals = [
+  { emoji:"🐶", name:"Chien" },
+  { emoji:"🐱", name:"Chat" },
+  { emoji:"🦊", name:"Renard" },
+  { emoji:"🐼", name:"Panda" },
+  { emoji:"🐸", name:"Grenouille" },
+  { emoji:"🐵", name:"Singe" },
+  { emoji:"🦁", name:"Lion" },
+  { emoji:"🐯", name:"Tigre" },
+  { emoji:"🦄", name:"Licorne" },
+  { emoji:"🐙", name:"Pieuvre" },
+  { emoji:"🐠", name:"Poisson" },
+  { emoji:"🦕", name:"Dinosaure" },
+  { emoji:"🦖", name:"Tyrannosaure" },
+  { emoji:"🐨", name:"Koala" },
+  { emoji:"🐰", name:"Lapin" },
+  { emoji:"🦉", name:"Hibou" }
+];
+
+let unlockedAnimals = [];
+
+const goodTemplates = [
+  "{name}, bravo ! C’est excellent !",
+  "Super {name} !",
+  "Génial {name} !",
+  "{name}, c’est très bien !",
+  "Bravo {name}, tu es très fort !"
+];
+
+const retryTemplates = [
+  "Essaie encore {name}, tu es capable !",
+  "Recommence doucement {name}.",
+  "On réessaie {name} !",
+  "Ce n’est pas grave {name}, essaie encore !"
+];
 
 const FR_NUM = new Map([
   ["zéro",0],["zero",0],["un",1],["deux",2],["trois",3],["quatre",4],
@@ -309,12 +408,11 @@ const FR_NUM = new Map([
 
 const homeScreen = document.getElementById('homeScreen');
 const gameScreen = document.getElementById('gameScreen');
-
 const childNameEl = document.getElementById('childName');
 const playBtn = document.getElementById('playBtn');
 const repeatBtn = document.getElementById('repeatBtn');
 const changeChoicesBtn = document.getElementById('changeChoicesBtn');
-
+const resetAlbumBtn = document.getElementById('resetAlbumBtn');
 const qEl = document.getElementById('q');
 const dotsEl = document.getElementById('dots');
 const answerEl = document.getElementById('answer');
@@ -326,9 +424,35 @@ const playerLabelEl = document.getElementById('playerLabel');
 const modeLabelEl = document.getElementById('modeLabel');
 const rangeLabelEl = document.getElementById('rangeLabel');
 const fireworksEl = document.getElementById('fireworks');
-
+const collectionStatusEl = document.getElementById('collectionStatus');
+const albumGridEl = document.getElementById('albumGrid');
 const modeButtons = document.querySelectorAll('[data-mode]');
 const levelButtons = document.querySelectorAll('.level-btn');
+
+function saveState() {
+  try {
+    const state = {
+      childName: childNameEl.value.trim(),
+      selectedMode,
+      selectedRange,
+      unlockedAnimals
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+
+    if (typeof state.childName === "string") childNameEl.value = state.childName;
+    if (typeof state.selectedMode === "string") selectedMode = state.selectedMode;
+    if (typeof state.selectedRange === "string") selectedRange = state.selectedRange;
+    if (Array.isArray(state.unlockedAnimals)) unlockedAnimals = state.unlockedAnimals;
+  } catch (e) {}
+}
 
 function normalize(s){
   return (s || "")
@@ -342,12 +466,18 @@ function getChildName(){
   return childNameEl.value.trim() || "mon champion";
 }
 
+function fillTemplate(list){
+  const tpl = list[randInt(0, list.length - 1)];
+  return tpl.replaceAll("{name}", getChildName());
+}
+
 function speak(text){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'fr-CA';
-  u.rate = 0.92;
+  u.rate = 0.9;
+  u.pitch = 1.15;
   speechSynthesis.speak(u);
 }
 
@@ -378,6 +508,15 @@ function updateLabels(){
   playerLabelEl.textContent = getChildName();
   modeLabelEl.textContent = modeLabel(selectedMode);
   rangeLabelEl.textContent = selectedRange;
+}
+
+function updateSelectionsUI() {
+  modeButtons.forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.mode === selectedMode);
+  });
+  levelButtons.forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.range === selectedRange);
+  });
 }
 
 function showHome(){
@@ -439,6 +578,52 @@ function speakQuestion(){
     'divisé par';
 
   speak(`${a} ${word} ${b}`);
+}
+
+function renderAlbum(){
+  albumGridEl.innerHTML = '';
+
+  albumAnimals.forEach(animal => {
+    const found = unlockedAnimals.includes(animal.emoji);
+    const card = document.createElement('div');
+    card.className = 'album-card' + (found ? '' : ' locked');
+
+    const emoji = document.createElement('div');
+    emoji.className = 'album-emoji';
+    emoji.textContent = found ? animal.emoji : '❔';
+
+    const name = document.createElement('div');
+    name.className = 'album-name';
+    name.textContent = found ? animal.name : 'Mystère';
+
+    card.appendChild(emoji);
+    card.appendChild(name);
+    albumGridEl.appendChild(card);
+  });
+
+  collectionStatusEl.textContent = `${unlockedAnimals.length} / ${albumAnimals.length} trouvés`;
+}
+
+function unlockAnimal(){
+  const lockedAnimals = albumAnimals.filter(a => !unlockedAnimals.includes(a.emoji));
+  let chosen;
+
+  if(lockedAnimals.length > 0){
+    chosen = lockedAnimals[randInt(0, lockedAnimals.length - 1)];
+    unlockedAnimals.push(chosen.emoji);
+  } else {
+    chosen = albumAnimals[randInt(0, albumAnimals.length - 1)];
+  }
+
+  renderAlbum();
+  saveState();
+  return chosen.emoji;
+}
+
+function nextRangeValue(){
+  if(selectedRange === '0-10') return '10-20';
+  if(selectedRange === '10-20') return '20-50';
+  return '20-50';
 }
 
 function newQuestion(){
@@ -522,9 +707,27 @@ function launchFireworks(){
 
 function finishSeries(){
   locked = true;
-  msgEl.textContent = `🎉 Bravo ${getChildName()} ! Tu as réussi 10 questions !`;
+
+  const currentLevel = selectedRange;
+  selectedRange = nextRangeValue();
+  updateLabels();
+  updateSelectionsUI();
+  saveState();
+
+  let message = `🎉 Bravo ${getChildName()} ! Tu as réussi 10 questions !`;
+  if(currentLevel !== selectedRange){
+    message += ` Nouveau niveau : ${selectedRange} !`;
+  } else {
+    message += ` Tu restes au niveau ${selectedRange}.`;
+  }
+
+  if(unlockedAnimals.length === albumAnimals.length){
+    message += ` En plus, ton album est complet !`;
+  }
+
+  msgEl.textContent = message;
   rewardEl.textContent = '🏆';
-  speak(`Bravo ${getChildName()} ! Tu as réussi dix questions !`);
+  speak(message);
   launchFireworks();
 
   setTimeout(() => {
@@ -532,7 +735,7 @@ function finishSeries(){
     okCountEl.textContent = correctCount;
     locked = false;
     newQuestion();
-  }, 3200);
+  }, 5000);
 }
 
 function checkAnswer(){
@@ -547,25 +750,27 @@ function checkAnswer(){
   if(val === expected){
     correctCount++;
     okCountEl.textContent = correctCount;
-    rewardEl.textContent = rewards[randInt(0, rewards.length - 1)];
 
-    const text = `${goodPhrases[randInt(0, goodPhrases.length - 1)]} ${getChildName()} !`;
+    const animal = unlockAnimal();
+    rewardEl.textContent = animal;
+
+    const text = fillTemplate(goodTemplates);
     msgEl.textContent = text;
     speak(text);
 
     if(correctCount >= 10){
-      setTimeout(finishSeries, 2200);
+      setTimeout(finishSeries, 5000);
       return;
     }
 
     setTimeout(() => {
       locked = false;
       newQuestion();
-    }, 2200);
+    }, 5000);
 
   } else {
     rewardEl.textContent = '';
-    const text = `${retryPhrases[randInt(0, retryPhrases.length - 1)]}, ${getChildName()} !`;
+    const text = fillTemplate(retryTemplates);
     msgEl.textContent = text;
     speak(text);
 
@@ -573,23 +778,23 @@ function checkAnswer(){
       locked = false;
       answerEl.focus();
       answerEl.select();
-    }, 1800);
+    }, 3000);
   }
 }
 
 modeButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     selectedMode = btn.dataset.mode;
-    modeButtons.forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
+    updateSelectionsUI();
+    saveState();
   });
 });
 
 levelButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     selectedRange = btn.dataset.range;
-    levelButtons.forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
+    updateSelectionsUI();
+    saveState();
   });
 });
 
@@ -597,16 +802,27 @@ playBtn.addEventListener('click', () => {
   correctCount = 0;
   okCountEl.textContent = correctCount;
   updateLabels();
+  saveState();
   showGame();
   newQuestion();
 });
 
 changeChoicesBtn.addEventListener('click', () => {
+  saveState();
   showHome();
 });
 
 repeatBtn.addEventListener('click', () => {
   speakQuestion();
+});
+
+resetAlbumBtn.addEventListener('click', () => {
+  unlockedAnimals = [];
+  renderAlbum();
+  saveState();
+  msgEl.textContent = "Album réinitialisé.";
+  rewardEl.textContent = '';
+  speak("Album réinitialisé.");
 });
 
 checkBtn.addEventListener('click', checkAnswer);
@@ -620,10 +836,15 @@ answerEl.addEventListener('focus', startWatcher);
   answerEl.addEventListener(evt, () => setTimeout(applyDictationFix, 0));
 });
 
-// valeurs par défaut visuelles
-document.querySelector('[data-mode="add"]').classList.add('selected');
-document.querySelector('[data-range="0-10"]').classList.add('selected');
+childNameEl.addEventListener('input', () => {
+  updateLabels();
+  saveState();
+});
+
+loadState();
+updateSelectionsUI();
 updateLabels();
+renderAlbum();
 </script>
 </body>
 </html>
