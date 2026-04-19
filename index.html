@@ -29,14 +29,8 @@ body{
 .screen{display:none;}
 .screen.active{display:block;}
 
-h1{
-  margin:0 0 12px 0;
-  font-size:32px;
-}
-h2{
-  margin:8px 0 14px 0;
-  font-size:26px;
-}
+h1{margin:0 0 12px 0;font-size:32px;}
+h2{margin:8px 0 14px 0;font-size:26px;}
 .intro{
   font-size:17px;
   color:#4b5d7d;
@@ -137,6 +131,7 @@ input[type="text"]{
   gap:8px;
   flex-wrap:wrap;
   justify-content:center;
+  align-items:center;
   margin-top:10px;
   margin-bottom:8px;
 }
@@ -144,6 +139,14 @@ input[type="text"]{
   font-size:26px;
   width:220px;
   text-align:center;
+}
+.mic-btn{
+  min-width:64px;
+  min-height:56px;
+  font-size:28px;
+  background:#27ae60;
+  color:#fff;
+  border:0;
 }
 .msg{
   font-size:24px;
@@ -178,7 +181,7 @@ input[type="text"]{
 }
 .album-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(84px, 1fr));
+  grid-template-columns:repeat(10, minmax(0, 1fr));
   gap:8px;
 }
 .album-card{
@@ -189,11 +192,11 @@ input[type="text"]{
   min-height:78px;
 }
 .album-emoji{
-  font-size:30px;
+  font-size:28px;
   line-height:1.1;
 }
 .album-name{
-  font-size:13px;
+  font-size:12px;
   margin-top:4px;
 }
 .album-card.locked{
@@ -233,6 +236,12 @@ input[type="text"]{
   100%{
     transform:translate(var(--dx), var(--dy)) scale(1.8);
     opacity:0;
+  }
+}
+
+@media (max-width: 900px){
+  .album-grid{
+    grid-template-columns:repeat(5, minmax(0, 1fr));
   }
 }
 </style>
@@ -300,6 +309,7 @@ input[type="text"]{
       <div class="dotsRow" id="dots"></div>
 
       <div class="answerRow">
+        <button id="micBtn" class="mic-btn" type="button" aria-label="Micro">🎤</button>
         <input id="answer" type="text" placeholder="Réponse">
         <button id="checkBtn" class="primary" type="button">Vérifier</button>
       </div>
@@ -309,7 +319,7 @@ input[type="text"]{
 
       <div class="collection-box">
         <div class="collection-title" id="collectionTitle">🐾 Album d’animaux</div>
-        <div class="collection-status" id="collectionStatus">0 / 16 trouvés</div>
+        <div class="collection-status" id="collectionStatus">0 / 20 trouvés</div>
         <div class="album-grid" id="albumGrid"></div>
       </div>
     </div>
@@ -319,7 +329,7 @@ input[type="text"]{
 </div>
 
 <script>
-const STORAGE_KEY = "jeu-maths-album-v4";
+const STORAGE_KEY = "jeu-maths-album-v6";
 
 let a = 0;
 let b = 0;
@@ -350,7 +360,11 @@ const albumAnimals = [
   { emoji:"🦖", fr:"Tyrannosaure", en:"T-Rex" },
   { emoji:"🐨", fr:"Koala", en:"Koala" },
   { emoji:"🐰", fr:"Lapin", en:"Rabbit" },
-  { emoji:"🦉", fr:"Hibou", en:"Owl" }
+  { emoji:"🦉", fr:"Hibou", en:"Owl" },
+  { emoji:"🦓", fr:"Zèbre", en:"Zebra" },
+  { emoji:"🦒", fr:"Girafe", en:"Giraffe" },
+  { emoji:"🐢", fr:"Tortue", en:"Turtle" },
+  { emoji:"🦋", fr:"Papillon", en:"Butterfly" }
 ];
 
 let unlockedAnimals = [];
@@ -430,10 +444,10 @@ const TEXT = {
     newVoice: "Nouvelle voix",
     levelChanged: "Niveau changé",
     albumReset: "Album réinitialisé.",
+    albumComplete: "Album complet ! Bravo !",
     finishStart: "🎉 Bravo {name} ! Tu as réussi 10 questions !",
     finishUp: " Nouveau niveau : {level} !",
     finishStay: " Tu restes au niveau {level}.",
-    finishAlbum: " En plus, ton album est complet !",
     homeNote: "Après 10 bonnes réponses, feu d’artifice + progression automatique 🎆<br>L’album d’animaux est sauvegardé sur l’iPad."
   },
   en: {
@@ -485,10 +499,10 @@ const TEXT = {
     newVoice: "New voice",
     levelChanged: "Level changed",
     albumReset: "Album reset.",
+    albumComplete: "Album complete! Great job!",
     finishStart: "🎉 Bravo {name}! You answered 10 questions!",
     finishUp: " New level: {level}!",
     finishStay: " You stay at level {level}.",
-    finishAlbum: " Your album is complete too!",
     homeNote: "After 10 good answers: fireworks + automatic progression 🎆<br>The animal album is saved on the iPad."
   }
 };
@@ -507,6 +521,7 @@ const voiceBtn = document.getElementById('voiceBtn');
 const languageBtn = document.getElementById('languageBtn');
 const prevLevelBtn = document.getElementById('prevLevelBtn');
 const nextLevelBtn = document.getElementById('nextLevelBtn');
+const micBtn = document.getElementById('micBtn');
 const qEl = document.getElementById('q');
 const dotsEl = document.getElementById('dots');
 const answerEl = document.getElementById('answer');
@@ -755,6 +770,11 @@ function stopWatcher(){
   watcher = null;
 }
 
+function openKeyboardForDictation(){
+  answerEl.focus();
+  startWatcher();
+}
+
 function drawDots(n){
   dotsEl.innerHTML = '';
   if(n <= 0 || n > 20) return;
@@ -795,6 +815,12 @@ function renderAlbum(){
   collectionStatusEl.textContent = `${unlockedAnimals.length} / ${albumAnimals.length} ${t().found}`;
 }
 
+function resetAlbumVisualAndData(){
+  unlockedAnimals = [];
+  renderAlbum();
+  saveState();
+}
+
 function unlockAnimal(){
   const lockedAnimals = albumAnimals.filter(a => !unlockedAnimals.includes(a.emoji));
   let chosen;
@@ -808,6 +834,23 @@ function unlockAnimal(){
 
   renderAlbum();
   saveState();
+
+  if(unlockedAnimals.length === albumAnimals.length){
+    const albumMessage = t().albumComplete;
+    msgEl.textContent = albumMessage;
+    rewardEl.textContent = "🏆";
+    speak(albumMessage);
+    launchFireworks();
+
+    setTimeout(() => {
+      resetAlbumVisualAndData();
+      if (!locked) {
+        msgEl.textContent = '';
+        rewardEl.textContent = '';
+      }
+    }, 3000);
+  }
+
   return chosen.emoji;
 }
 
@@ -833,8 +876,6 @@ function newQuestion(){
   msgEl.textContent = '';
   rewardEl.textContent = '';
   answerEl.value = '';
-  answerEl.focus();
-  startWatcher();
 
   const { min, max } = parseRange();
   const mode = actualMode();
@@ -920,10 +961,6 @@ function finishSeries(){
     message += t().finishStay.replace("{level}", selectedRange);
   }
 
-  if(unlockedAnimals.length === albumAnimals.length){
-    message += t().finishAlbum;
-  }
-
   msgEl.textContent = message;
   rewardEl.textContent = '🏆';
   speak(message);
@@ -977,6 +1014,7 @@ function checkAnswer(){
       locked = false;
       answerEl.focus();
       answerEl.select();
+      startWatcher();
     }, 3000);
   }
 }
@@ -1059,12 +1097,14 @@ nextLevelBtn.addEventListener('click', () => {
 });
 
 resetAlbumBtn.addEventListener('click', () => {
-  unlockedAnimals = [];
-  renderAlbum();
-  saveState();
+  resetAlbumVisualAndData();
   msgEl.textContent = t().albumReset;
   rewardEl.textContent = '';
   speak(t().albumReset);
+});
+
+micBtn.addEventListener('click', () => {
+  openKeyboardForDictation();
 });
 
 checkBtn.addEventListener('click', checkAnswer);
